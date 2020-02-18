@@ -1,6 +1,6 @@
 # Testing out Kubespray
 This is a kubespray testing repository with a Vagrantfile to start asap.
-4 machines are created, connected to a private network.
+4 machines (Ubuntu) are created, connected to a private network.
 
 ## ToDos
 1. Initialize the 4 machines, 3 nodes, 1 ansible master
