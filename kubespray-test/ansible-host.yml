@@ -1,0 +1,58 @@
+---
+- hosts: all
+  tasks:
+  - name: Update apt cache on Ansible-host
+    become: true
+    apt:
+      update_cache: yes
+      upgrade: yes
+
+  - name: Copy correct sshd_config to ansible-node
+    become: true
+    copy:
+      src: sshd_config
+      dest: /etc/ssh/sshd_config
+      owner: root
+      group: root
+      mode: '0644'
+    notify:
+      - Restart sshd
+
+  - name: Install git and python-pip
+    become: true
+    apt:
+      pkg:
+      - git
+      - python-pip
+      - python3-pip
+      update_cache: yes
+      state: present
+
+  - name: Upgrade pip3
+    become: true
+    pip:
+      name: pip
+      executable: pip3
+      extra_args: --upgrade
+    tags: pip, python3
+
+  - name: Create SSH keys for user vagrant
+    user:
+      name: vagrant
+      generate_ssh_key: yes
+
+  - name: Clone the kubespray repository
+    git:
+      repo: https://github.com/kubernetes-sigs/kubespray.git
+      dest: ~/kubespray/
+    tags: kubespray
+
+  - name: Install Kubespray pip requirements
+    pip:
+      requirements: ~/kubespray/requirements.txt
+      executable: pip3
+
+  handlers:
+  - name: Restart sshd
+    become: true
+    command: systemctl restart sshd
