@@ -36,6 +36,19 @@
       extra_args: --upgrade
     tags: pip, python3
 
+  - name: Set root password to 'root'
+    become: true
+    user:
+      name: root
+      password: "{{ root_password | password_hash('sha512') }}"
+      update_password: always
+
+  - name: Set authorizd ssh key from standard path
+    authorized_key:
+      user: vagrant
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
   handlers:
   - name: Restart sshd
     become: true

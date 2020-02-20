@@ -41,6 +41,18 @@
       name: vagrant
       generate_ssh_key: yes
 
+  - name: Fetch Master Key
+    fetch:
+      src: "~/.ssh/id_rsa.pub"
+      dest: "./Master-Key/"
+
+  - name: Change password for root to 'root'
+    become: true
+    user:
+      name: root
+      password: "{{ root_password | password_hash('sha512') }}"
+      update_password: always
+
   - name: Clone the kubespray repository
     git:
       repo: https://github.com/kubernetes-sigs/kubespray.git
@@ -52,8 +64,15 @@
       requirements: ~/kubespray/requirements.txt
       executable: pip3
 
+  - name: Set authorizd ssh key from standard path
+    authorized_key:
+      user: vagrant
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
   handlers:
   - name: Restart sshd
     become: true
     command: systemctl restart sshd
+
 
