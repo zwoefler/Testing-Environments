@@ -2,6 +2,11 @@
 This is a kubespray testing repository with a Vagrantfile to start asap.
 4 machines (Ubuntu) are created, connected to a private network.
 
+# Architecture
+
+![alt text](img/Architecture.png "Architecture")
+
+
 
 # How to use it?
 
@@ -33,13 +38,13 @@ On Install Kubernetes kubectl binary with curl:
 
     curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.0/bin/linux/amd64/kubectl
 
-*. Make the kubectl binary executable:
+2. Make the kubectl binary executable:
     `chmod +x ./kubectl`
 
-*. Move the binary in to your PATH:
+3. Move the binary in to your PATH:
     `sudo mv ./kubectl /usr/local/bin/kubectl`
 
-*. Test to ensure the version you installed is up-to-date:
+4. Test to ensure the version you installed is up-to-date:
     `kubectl version --client`
 
 
@@ -55,9 +60,10 @@ sudo apt-get install -y kubectl
 
 
 ### Installation
-1. Clone this repository via git clone: `git clone git@github.com:zwoefler/Testing-Environments.git`
-*. Change Directory into kubespray-test: `cd Testing-Environments/kubespray-test`
-*.
+1. Install the [prerequisites](#Prerequisites)
+2. Clone this repository via git clone: `git clone git@github.com:zwoefler/Testing-Environments.git`
+3. Change Directory into kubespray-test: `cd Testing-Environments/kubespray-test`
+4. Run the Vagrantfile: `vagrant up`. It can take some time (several minutes) to create the machines and provisioning with ansible
 
 
 

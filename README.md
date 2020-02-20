@@ -10,8 +10,8 @@ This repository contains subdirectories, which usually hold Vagrant Scripts and 
 
 **Installation**
 1. Clone this repository: `git clone git@github.com:zwoefler/Testing-Environments.git`
-* Change directory in your desired environment-folde: `cd DESIRED_FOLDER`
-* Follow the installation and setup steps in the README, you find there
+2. Change directory in your desired environment-folde: `cd DESIRED_FOLDER`
+3. Follow the installation and setup steps in the README, you find there
 
 
 
