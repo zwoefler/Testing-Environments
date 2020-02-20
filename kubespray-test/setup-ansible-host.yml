@@ -54,6 +54,14 @@
       password: "{{ root_password | password_hash('sha512') }}"
       update_password: always
 
+  - name: Set authorizd ssh key from standard path
+    become: true
+    authorized_key:
+      user: "{{ item }}"
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    loop: "{{ users }}"
+
   - name: Clone the kubespray repository
     git:
       repo: https://github.com/kubernetes-sigs/kubespray.git
@@ -64,14 +72,6 @@
     pip:
       requirements: ~/kubespray/requirements.txt
       executable: pip3
-
-  - name: Set authorizd ssh key from standard path
-    become: true
-    authorized_key:
-      user: "{{ item }}"
-      state: present
-      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-    loop: "{{ users }}"
 
   handlers:
   - name: Restart sshd

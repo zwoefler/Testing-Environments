@@ -48,7 +48,8 @@
     authorized_key:
       user: vagrant
       state: present
-      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      key: "{{ lookup('file', '{{ item }}') }}"
+    loop: "{{ ssh_keys }}"
 
   - name: Set authorizd ssh key for user 'root'
     become: true

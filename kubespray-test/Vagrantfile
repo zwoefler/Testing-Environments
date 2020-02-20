@@ -10,6 +10,20 @@ NODE_COUNT = 3
 
 Vagrant.configure("2") do |config|
 
+  # Create the Master Node and provision with Master Setup
+  config.vm.define "ansible-host" do |ans|
+    ans.vm.box = BOX_IMAGE
+    ans.vm.hostname = "ansible-host"
+    ans.vm.network "private_network", ip: "192.168.33.10"
+    ans.vm.provider "virtualbox" do |v|
+      v.memory = 3072
+      v.cpus = 3
+    end
+    ans.vm.provision :ansible do |ansible|
+      ansible.playbook = "setup-ansible-host.yml"
+    end
+  end
+
   # Create Nodes and provision with basic setup
   (1..NODE_COUNT).each do |i|
     config.vm.define "node#{i}" do |subans|
@@ -26,18 +40,6 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  # Create the Master Node and provision with Master Setup
-  config.vm.define "ansible-host" do |ans|
-    ans.vm.box = BOX_IMAGE
-    ans.vm.hostname = "ansible-host"
-    ans.vm.network "private_network", ip: "192.168.33.10"
-    ans.vm.provider "virtualbox" do |v|
-      v.memory = 3072
-      v.cpus = 3
-    end
-    ans.vm.provision :ansible do |ansible|
-      ansible.playbook = "setup-ansible-host.yml"
-    end
-  end
+
 
 end
