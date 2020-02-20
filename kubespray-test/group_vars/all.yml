@@ -1,10 +1,10 @@
 ansible_python_interpreter: /usr/bin/python3
 root_user: root
 root_password: 'root'
-ssh_keys: {
-  host_path: "~/.ssh/id_rsa.pub",
-  master_key: "./Master-Key/id_rsa.pub"
-}
+ssh_keys: [
+  "~/.ssh/id_rsa.pub",
+  "./Master-Key/id_rsa.pub"
+]
 users: [
   "root",
   "vagrant"

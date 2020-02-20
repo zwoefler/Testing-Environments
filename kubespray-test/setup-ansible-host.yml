@@ -45,6 +45,7 @@
     fetch:
       src: "~/.ssh/id_rsa.pub"
       dest: "./Master-Key/"
+      flat: yes
 
   - name: Change password for root to 'root'
     become: true
@@ -65,10 +66,12 @@
       executable: pip3
 
   - name: Set authorizd ssh key from standard path
+    become: true
     authorized_key:
-      user: vagrant
+      user: "{{ item }}"
       state: present
       key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    loop: "{{ users }}"
 
   handlers:
   - name: Restart sshd

@@ -43,11 +43,21 @@
       password: "{{ root_password | password_hash('sha512') }}"
       update_password: always
 
-  - name: Set authorizd ssh key from standard path
+  - name: Set authorizd ssh key for user 'vagrant'
+    become: true
     authorized_key:
       user: vagrant
       state: present
       key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+  - name: Set authorizd ssh key for user 'root'
+    become: true
+    authorized_key:
+      user: root
+      state: present
+      key: "{{ lookup('file', '{{ item }}') }}"
+    loop: "{{ ssh_keys }}"
+
 
   handlers:
   - name: Restart sshd
