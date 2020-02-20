@@ -101,3 +101,5 @@ See if interport communication works by starting two `busybox` containers, each 
 
 - Implement a way, to vary the amount of nodes
     - Automatically adjust the amount of nodes, to the systems resources
+
+- Create roles out of the spaghetti playbooks!
