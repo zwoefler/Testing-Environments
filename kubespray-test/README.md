@@ -3,6 +3,7 @@ This is a kubespray testing repository with a Vagrantfile to start asap.
 4 machines (Ubuntu) are created, connected to a private network.
 
 # Architecture
+The architexture can be seen in the image below. From your host, several machines are set up with Vagrant. One of which is there to provision all Nodes. This is, so you don't need to have Ansible installed on your host.
 
 ![alt text](img/Architecture.png "Architecture")
 
@@ -64,6 +65,7 @@ sudo apt-get install -y kubectl
 2. Clone this repository via git clone: `git clone git@github.com:zwoefler/Testing-Environments.git`
 3. Change Directory into kubespray-test: `cd Testing-Environments/kubespray-test`
 4. Run the Vagrantfile: `vagrant up`. It can take some time (several minutes) to create the machines and provisioning with ansible
+
 
 
 
