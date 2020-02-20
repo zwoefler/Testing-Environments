@@ -64,11 +64,33 @@ sudo apt-get install -y kubectl
 1. Install the [prerequisites](#Prerequisites)
 2. Clone this repository via git clone: `git clone git@github.com:zwoefler/Testing-Environments.git`
 3. Change Directory into kubespray-test: `cd Testing-Environments/kubespray-test`
-4. Run the Vagrantfile: `vagrant up`. It can take some time (several minutes) to create the machines and provisioning with ansible
+4. Run the Vagrantfile: `vagrant up`. It can take some time (several minutes) to create the machines and provisioning with ansible.
+
+Once the infrastructure is set up, connect to the ansible-host and follow the subsequent steps. Python3, Kubespray and the dependencies are already installed.
+
+5. `vagrant ssh ansible-host`
+6. Once you are logged into the machine, change directory to kubespray `cd kubespray`
+7. Copy `inventory/sample` as `inventory/mycluster`
+`cp -rfp inventory/sample inventory/mycluster`
+8. Declare your node IPs and then run the `declare -a IPS=(192.168.33.20 192.168.33.30 192.168.33.40)`
+9. Afterwards, use the `CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inventory.py ${IPS[@]}` command to run the ansible inventory bilder
+10. Last but not least, run the Ansible playbook that creates your kubernetes cluster via `Kubespray`: `ansible-playbook -i inventory/mycluster/hosts.yaml  --become --become-user=root cluster.yml`. This step might take more than 20 minutes!
 
 
+### use your Cluster
+After the setup is finished, you can use your kubernetes Cluster.
+On your host-machine (Not one of the vagrant machines) get your kubernetes cluster information
+1. Create, if not already done, your local `.kube`-folder: `mkdir -p ~/.kube`
+2. Download the kubeconfig file from one of the masters, in this case, from `node1`: `scp root@192.168.33.20:/etc/kubernetes/admin.conf ~/.kube/config`.
+3. Now you should be able to run `kubectl` commands. Try `kubectl get nodes -o wide`.
+4. `kubectl cluster-info`, `kubectl -n kube-system get pods`
 
 
+### Test teh interport communication
+See if interport communication works by starting two `busybox` containers, each on one node.
+1. Open one terminal session: `kubectl run myshell -it --rm --image busybox -- sh`
+2. With `kubectl get pods -o wide` you can see in the `node`-column, where your container runs.
+2. In another terminal start a seconds `budybox` via: `kubectl run myshell2 -it --rm --image busybox -- sh`
 
 
 ## ToDos
