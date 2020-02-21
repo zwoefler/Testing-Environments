@@ -4,6 +4,7 @@ This is a kubespray testing repository with a Vagrantfile to start asap.
 
 # Architecture
 The architexture can be seen in the image below. From your host, several machines are set up with Vagrant. One of which is there to provision all Nodes. This is, so you don't need to have Ansible installed on your host.
+Your machine will be referenced as `Host` in this document!
 
 
 ### Machines
@@ -106,7 +107,7 @@ Once the infrastructure is set up, connect to the ansible-host and follow the su
 10. Last but not least, run the Ansible playbook that creates your kubernetes cluster via `Kubespray`: `ansible-playbook -i inventory/mycluster/hosts.yaml  --become --become-user=root cluster.yml`. This step might take more than 20 minutes!
 
 
-### use your Cluster
+### Use your Cluster
 After the setup is finished, you can use your kubernetes Cluster.
 On your host-machine (Not one of the vagrant machines) get your kubernetes cluster information
 1. Create, if not already done, your local `.kube`-folder: `mkdir -p ~/.kube`
@@ -118,18 +119,20 @@ On your host-machine (Not one of the vagrant machines) get your kubernetes clust
 
 ### Test the interport communication
 See if interport communication works by starting two `busybox` containers, each on one node.
-1. Open one terminal session:
+
+1. Open one terminal session on your host machine:
 
 `kubectl run myshell -it --rm --image busybox -- sh`
 
 2. With `kubectl get pods -o wide` you can see in the `node`-column, where your container runs.
-3. In another terminal start a seconds `budybox` via:
+3. In another terminal start a seconds `busybox` via:
 
 `kubectl run myshell2 -it --rm --image busybox -- sh`
 
 ## Upgrade Kubernetes Version
-`kubectl get nodes`
-`vagrant ssh ansible-host`
+We will need to make some changes on the `Ansible-host` machine. To see the changes live, run `kubectl get nodes` in a seperate terminal.
+
+So first, login to your cagrant ansible-`vagrant ssh ansible-host`
 `cd kubespray`
 `vim inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml`
 Search for `kube_version` by typing `/kube_version` in vim and hit enter. With `n` you can cycle through the selection.
@@ -150,19 +153,21 @@ To actually see what happens, I advise you to run the watch command on `kubectl 
 
 `watch -x kubectl get nodes`
 
+
+Login to the ansible machine: `vagrant ssh ansible-host` and change into kubespray. `cd kubespray`
+
+
 ### Adding a node
-Hot to add or remove a node using kubespray
-1. Login to the ansible machine: `vagrant ssh ansible-host`
-2. `cd kubespray`
-3. Edit the inventory file `vim inventory/mycluster/hosts.yaml`
-4. In the section `all: hosts:` just add or remove a node and change the IP addresses
+How to add or remove a node using kubespray
+1. Edit the inventory file `vim inventory/mycluster/hosts.yaml`
+2. In the section `all: hosts:` just add or remove a node and change the IP addresses
     ```
     node4:
       ansible_host: 192.168.33.50
       ip: 192.168.33.50
       access_ip: 192.168.33.50
     ```
-5. The previously created node `Node4` now must be added to one of the children-groups. If you want to add `Node4` as a worker node, add it to `kube-node` group, like so:
+3. The previously created node `Node4` now must be added to one of the children-groups. If you want to add `Node4` as a worker node, add it to `kube-node` group, like so:
 
 ```
 children:
@@ -178,7 +183,7 @@ children:
         node4:
 ```
 
-6. Close vim and run the ansible playbook: `ansible-playbook -i inventory/mycluster/hosts.yaml --user root scale.yml`
+5. Close vim and run the ansible playbook: `ansible-playbook -i inventory/mycluster/hosts.yaml --user root scale.yml`
 
 ### Removing a node
 Removing a node is as simple as running the `remove-node.yml` playbook, with some additional parameters. Below is the command to remove the previously created
@@ -194,8 +199,56 @@ Remove multiple Nodes `Node4` and `Node3`:
 
 So we will execute the Ansible-Playbook `remove-node.yml`, giving it the inventory file for our cluster, using the root user and specify what the name(s) of the nodes is, that we want to delete.
 
+Afterwards build your inventory file new or delete the no longer needed nodes from the `inventory/mycluster/hosts.yml`
 
 
+## Reset the Cluster
+Completely undo the cluster provisioning, everything regarding kubernetes will be undone. Returns you the machines in the given condition.
+
+Be logged into your `Ansible-host` VM via: `vagrant ssh ansible-host`
+
+1. cd into kubespray directory: `cd kubespray`
+2. Run `ansible-playbook -i inventory/mycluster/hosts.yml --user root reset.yml`
+3. Accept the deletion of your cluster
+4. BOOM, your cluster is gone. To prove it, on your host you run `kubectl get nodes`
+
+
+
+
+
+## Configure a Loadbalancer
+Instead of using a seperate machine, we will use our `ansible-host`. Because we are just running playbooks form it, we will use it to run something productive!
+So to start of, form your host log in to the `ansible-host` via: `vagrant ssh ansible-host`
+
+1. Install haproxy: `apt update && apt install -y haproxy`
+2. Edit haproxys configuration:
+`vim /etc/haproxy/haproxy.cfg`
+
+3. Add some configuration:
+```
+listen kubernetes-apiserver-https
+  bind 192.168.33.10:8383
+  option ssl-hello-chk
+  mode tcp
+  timeout client 3h
+  timeout server 3h
+  server master1 192.168.33.20:6443
+  server master2 192.168.33.30:6443
+  balance roundrobin
+```
+4. Restart the haproxy service!
+`sudo systemctl restart haproxy`
+
+5. SetUp the SSH-Keys
+6. Clone kubespray and install kubespray
+7. Specify that we are using an external loadbalancer:
+`vim inventory/mycluster/group_vars/all/all.yml`
+8. Uncomment the External LB example config section
+9. Set the IP Address and Port and domain-name
+10. Uncomment the line and set it to false `loadbalancer_apiserver_localhost: false`
+11. On your localhost, add the IP and domain to oyur /etc/hosts
+12. On the Ansible-host, rerun the cluster
+`ansible-playbook -i inventory/mycluster/hosts.yml --user root cluster.yml`
 
 ## ToDos
 1. Initialize the 4 machines, 3 nodes, 1 ansible master
