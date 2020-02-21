@@ -16,12 +16,14 @@ The architexture can be seen in the image below. From your host, several machine
 You need a virtual machine provider like virtual box.
 
 On Ubuntu install VirtualBox via:
+
 `sudo apt install virtual-box`
 
 ##### Vagrant
 To run a cluster locally, on your machine, you will also need vagrant, to setup VMs easily.
 
 On Ubuntu install Vagrant via:
+
 `sudo apt install vagrant`
 
 ##### Kubernetes
@@ -30,6 +32,7 @@ Once the VM setup is done, you will need kubernetes kubectl to control your Kube
 On Install Kubernetes kubectl binary with curl:
 
 1. Download the latest release with the command:
+
     `curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl`
 
 
@@ -37,15 +40,18 @@ On Install Kubernetes kubectl binary with curl:
 
     For example, to download version v1.17.0 on Linux, type:
 
-    curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.0/bin/linux/amd64/kubectl
+    `curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.0/bin/linux/amd64/kubectl`
 
 2. Make the kubectl binary executable:
+
     `chmod +x ./kubectl`
 
 3. Move the binary in to your PATH:
+
     `sudo mv ./kubectl /usr/local/bin/kubectl`
 
 4. Test to ensure the version you installed is up-to-date:
+
     `kubectl version --client`
 
 
@@ -82,15 +88,37 @@ After the setup is finished, you can use your kubernetes Cluster.
 On your host-machine (Not one of the vagrant machines) get your kubernetes cluster information
 1. Create, if not already done, your local `.kube`-folder: `mkdir -p ~/.kube`
 2. Download the kubeconfig file from one of the masters, in this case, from `node1`: `scp root@192.168.33.20:/etc/kubernetes/admin.conf ~/.kube/config`.
-3. Now you should be able to run `kubectl` commands. Try `kubectl get nodes -o wide`.
+3. Now you should be able to run `kubectl` commands. Try
+`kubectl get nodes -o wide`.
 4. `kubectl cluster-info`, `kubectl -n kube-system get pods`
 
 
-### Test teh interport communication
+### Test the interport communication
 See if interport communication works by starting two `busybox` containers, each on one node.
-1. Open one terminal session: `kubectl run myshell -it --rm --image busybox -- sh`
+1. Open one terminal session:
+
+`kubectl run myshell -it --rm --image busybox -- sh`
+
 2. With `kubectl get pods -o wide` you can see in the `node`-column, where your container runs.
-2. In another terminal start a seconds `budybox` via: `kubectl run myshell2 -it --rm --image busybox -- sh`
+3. In another terminal start a seconds `budybox` via:
+
+`kubectl run myshell2 -it --rm --image busybox -- sh`
+
+## Upgrade Kubernetes Version
+`kubectl get nodes`
+`vagrant ssh ansible-host`
+`cd kubespray`
+`vim inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml`
+Search for `kube_version` by typing `/kube_version` in vim and hit enter. With `n` you can cycle through the selection.
+`ansible-playbook -i inventory/mycluster/hosts.yaml --user root upgrade-cluster.yml`
+
+
+### Example
+1. Run two nginx container: `kubectl run nginx --image nginx --replicas 2`
+2. `watch -x kubectl get nodes,pods -o wide`
+3. Run the steps from [#upgrade-kubernetes-version]
+You will see that nodes are getting shut down and recreated. Kubespray is taking care of all the upgrading process and managing the two nginx containers that we set up.
+
 
 
 ## ToDos
