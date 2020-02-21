@@ -5,6 +5,29 @@ This is a kubespray testing repository with a Vagrantfile to start asap.
 # Architecture
 The architexture can be seen in the image below. From your host, several machines are set up with Vagrant. One of which is there to provision all Nodes. This is, so you don't need to have Ansible installed on your host.
 
+
+### Machines
+The setup consists of four machines:
+- 1 Ansible Host - runs Ansible and deploys teh cluster to the working nodes
+- 3 VMs - These `nodes` actually run the kubernetes cluster.
+
+From the Ansible host you can reach every machine via SSH. Below, you find a list of the machines IP addresses:
+
+| VM | IP |
+| --- | --- |
+| Ansible Host | 192.168.33.10 |
+| Node1 | 192.168.33.20 |
+| Node2 | 192.168.33.30 |
+| Node3 | 192.168.33.40 |
+
+### Users
+Each machine has the user `root` and `vagrant`. The SSH keys are set up, sos you don't need a password to enter the machines. In case you do, the passwords are listed below:
+
+| User | Password |
+| --- | --- |
+| root | root |
+| vagrant | vagrant |
+
 ![alt text](img/Architecture.png "Architecture")
 
 
@@ -118,6 +141,18 @@ Search for `kube_version` by typing `/kube_version` in vim and hit enter. With `
 2. `watch -x kubectl get nodes,pods -o wide`
 3. Run the steps from [#upgrade-kubernetes-version]
 You will see that nodes are getting shut down and recreated. Kubespray is taking care of all the upgrading process and managing the two nginx containers that we set up.
+
+
+
+
+## Adding and Removing Nodes
+Hot to add or remove a node using kubespray
+1. Change into the ansible machine: `vagrant ssh ansible-host`
+2. `cd kubespray`
+3.
+
+
+
 
 
 
