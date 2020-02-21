@@ -146,12 +146,53 @@ You will see that nodes are getting shut down and recreated. Kubespray is taking
 
 
 ## Adding and Removing Nodes
+To actually see what happens, I advise you to run the watch command on `kubectl get nodes` in a seperate terminal.
+
+`watch -x kubectl get nodes`
+
+### Adding a node
 Hot to add or remove a node using kubespray
-1. Change into the ansible machine: `vagrant ssh ansible-host`
+1. Login to the ansible machine: `vagrant ssh ansible-host`
 2. `cd kubespray`
-3.
+3. Edit the inventory file `vim inventory/mycluster/hosts.yaml`
+4. In the section `all: hosts:` just add or remove a node and change the IP addresses
+    ```
+    node4:
+      ansible_host: 192.168.33.50
+      ip: 192.168.33.50
+      access_ip: 192.168.33.50
+    ```
+5. The previously created node `Node4` now must be added to one of the children-groups. If you want to add `Node4` as a worker node, add it to `kube-node` group, like so:
 
+```
+children:
+    kube-master:
+      hosts:
+        node1:
+        node2:
+    kube-node:
+      hosts:
+        node1:
+        node2:
+        node3:
+        node4:
+```
 
+6. Close vim and run the ansible playbook: `ansible-playbook -i inventory/mycluster/hosts.yaml --user root scale.yml`
+
+### Removing a node
+Removing a node is as simple as running the `remove-node.yml` playbook, with some additional parameters. Below is the command to remove the previously created
+`node4`. Removing more than one node is as simple as just appending the nodes to the extra-vars.
+
+Remove `Node4`:
+
+`ansible-playbook -i inventory/mycluster/hosts.yaml --user root remove-node.yml --extra-vars "node=node4"`
+
+Remove multiple Nodes `Node4` and `Node3`:
+
+`ansible-playbook -i inventory/mycluster/hosts.yaml --user root remove-node.yml --extra-vars "node=node4,node3"`
+
+So we will execute the Ansible-Playbook `remove-node.yml`, giving it the inventory file for our cluster, using the root user and specify what the name(s) of the nodes is, that we want to delete.
 
 
 
@@ -166,3 +207,12 @@ Hot to add or remove a node using kubespray
     - Automatically adjust the amount of nodes, to the systems resources
 
 - Create roles out of the spaghetti playbooks!
+
+- [ ] Add a machine, provision it and use it as an additional node - Automatically:
+    - [ ] Script to add Vagrant machine
+    - [ ] Provision the machine
+        - [ ] SSH keys
+        - [ ] Software
+        - [ ] Users
+        - [ ] ...
+    - [ ] Automate the adding a node to the cluster [#adding-and-removing-nodes]
