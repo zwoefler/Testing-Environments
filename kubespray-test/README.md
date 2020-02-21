@@ -105,7 +105,7 @@ sudo apt-get install -y kubectl
 ```
 
 
-### Set Up
+## Set Up
 ##### Initial SetUp
 These steps are performed on your `Host`.
 
@@ -155,35 +155,54 @@ This creates a `hosts.yml` in your `mycluster` folder, that is being used for pr
 Be warned, this step might take 20 minutes or more!
 
 Finishing this step, you now have a running Kubernetes Cluster on several virtual machines. Congratulations!
-To use your cluster productivly, install `kubectl` on your `Host`. More information is found in the [next section](#use-your-cluster)
+To use your cluster productivly, install `kubectl` on your `Host`. More information is found in the [next section](#use-your-cluster).
 
 
-### Use your Cluster
-After the setup is finished, you can use your kubernetes Cluster.
-On your host-machine (Not one of the vagrant machines) get your kubernetes cluster information
-1. Create, if not already done, your local `.kube`-folder: `mkdir -p ~/.kube`
-2. Download the kubeconfig file from one of the masters, in this case, from `node1`: `scp root@192.168.33.20:/etc/kubernetes/admin.conf ~/.kube/config`.
-3. Now you should be able to run `kubectl` commands. Try
-`kubectl get nodes -o wide`.
-4. `kubectl cluster-info`, `kubectl -n kube-system get pods`
+##### Setup Kubernetes on your Host
+You have now a running Cluster, now its time to use and configure it.
+We now need to copy the kubernetes `admin.conf` from the master node `node1` to our local system.
+FOr that, we need the IP address of our master node.
+On your `Host`, follow the steps below:
+1. Create, if not already done, your local `.kube`-folder:
+`mkdir -p ~/.kube`
+
+2. Download the kubeconfig file from one of the masters, in this case, from `node1`:
+`scp root@192.168.33.20:/etc/kubernetes/admin.conf ~/.kube/config`
+
+We safecopy the `admin.conf` file from our `node1`, and paste it into our local `~/.kube` folder.
+
+3. Now you should be able to run `kubectl` commands. Use the following command, to show you a list of the running nodes:
+`kubectl get nodes -o wide`
+
+4. Additional commands to gather some informaion are
+`kubectl cluster-info` and `kubectl -n kube-system get pods`
+
+Now we have setup our cluster and can use our local installation of `kubectl` to run some containers.
 
 
-### Test the interport communication
-See if interport communication works by starting two `busybox` containers, each on one node.
+##### Test the interport communication
+In order to test, if the installation worked correctly, we test the interport communication
+by creating two `busybox` containers, each on one node.
 
-1. Open one terminal session on your host machine:
+1. Open one terminal session on your host machine and create the busybox container, running a shell:
 
 `kubectl run myshell -it --rm --image busybox -- sh`
 
-2. With `kubectl get pods -o wide` you can see in the `node`-column, where your container runs.
-3. In another terminal start a seconds `busybox` via:
+You will be prompted with a new shell, running in your busybox
+
+2. Open a second temrinal, and run `kubectl get pods -o wide`. In the `node`-column, it is specified, on which node your container runs.
+3. Start a third terminal, and run a second budybox container in your cluster via:
 
 `kubectl run myshell2 -it --rm --image busybox -- sh`
 
-## Upgrade Kubernetes Version
-We will need to make some changes on the `Ansible-host` machine. To see the changes live, run `kubectl get nodes` in a seperate terminal.
+4. MISSING PING OTHER CONTAINERS!!!!
 
-So first, login to your cagrant ansible-`vagrant ssh ansible-host`
+
+
+## Upgrade Kubernetes Version
+Once your cluster is up and running, you maybe want to update the kubernetes version that is used. You can do this very easily with the following steps. On the `ansible-host` machine we will make some changes.
+
+So first, login to your vagrant ansible-`vagrant ssh ansible-host`
 `cd kubespray`
 `vim inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml`
 Search for `kube_version` by typing `/kube_version` in vim and hit enter. With `n` you can cycle through the selection.
