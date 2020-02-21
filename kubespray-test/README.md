@@ -1,15 +1,26 @@
 # Kubespray environment
-This is a kubespray testing repository with a Vagrantfile to start asap.
-4 machines (Ubuntu) are created, connected to a private network.
+This environment simulates four machines, that can be used to run a kubernetes cluster.
+To run a kubernetes cluster on these machines, the project `kubespray` is being used.
+It is a bunch of Ansible playbooks, that tae care of the initialization and installation
+of all relevant compontents, needed to run a Kubernetes Cluster on bare metal.
+
+
+# Goal
+This repository aims to get used to `kubespray`, the installation and setup-process. Therefore the kubespray usage is not fully automated with Ansible scripts!
 
 # Architecture
-The architexture can be seen in the image below. From your host, several machines are set up with Vagrant. One of which is there to provision all Nodes. This is, so you don't need to have Ansible installed on your host.
-Your machine will be referenced as `Host` in this document!
+The architexture can be seen in the image below.
+![alt text](img/Architecture.png "Architecture")
+
+THis environment consists of your `Host`, an `ansible-host` (VM) and some `nodes` VM to run the Kubernetes Cluster.
+The `ansible-host` s being used, to run `Kubespray` and serves as an external Load Balancer. This is, so you don't need to have Ansible installed on your host.
+
+In the following document, your local machine ist refered to as `Host`, the machine running Ansible and setting up the Cluster is refered to by `ansible-host` and every other Node is referenced as `nodeX`, with `X` being a number.
 
 
 ### Machines
 The setup consists of four machines:
-- 1 Ansible Host - runs Ansible and deploys teh cluster to the working nodes
+- 1 Ansible Host - runs Ansible and deploys the cluster to the working nodes
 - 3 VMs - These `nodes` actually run the kubernetes cluster.
 
 From the Ansible host you can reach every machine via SSH. Below, you find a list of the machines IP addresses:
@@ -29,22 +40,25 @@ Each machine has the user `root` and `vagrant`. The SSH keys are set up, sos you
 | root | root |
 | vagrant | vagrant |
 
-![alt text](img/Architecture.png "Architecture")
+
 
 
 
 # How to use it?
 
-### Prerequisites
+## Prerequisites
 ##### VM Provider
-You need a virtual machine provider like virtual box.
+THis example uses Vagrant to provide the Virtual Machines, but any other
+Provider should be fine.
+In case you want to follow this repository in the intentioned way, install Virtual Box.
+Should you prefer to use an alternative, Create 4 VMs, provision one of the machines with the `setup-ansible-host.yml` playbook, and the remaining machines with the `setup-worker-node.yml` playbook.
 
 On Ubuntu install VirtualBox via:
 
 `sudo apt install virtual-box`
 
 ##### Vagrant
-To run a cluster locally, on your machine, you will also need vagrant, to setup VMs easily.
+To run a cluster locally, on your machine, you need vagrant, to setup VMs easily, with the included `Vagrantfile`.
 
 On Ubuntu install Vagrant via:
 
@@ -53,7 +67,8 @@ On Ubuntu install Vagrant via:
 ##### Kubernetes
 Once the VM setup is done, you will need kubernetes kubectl to control your Kubernetes cluster.
 
-On Install Kubernetes kubectl binary with curl:
+
+Install Kubernetes kubectl binary with curl:
 
 1. Download the latest release with the command:
 
@@ -90,21 +105,57 @@ sudo apt-get install -y kubectl
 ```
 
 
-### Installation
+### Set Up
+##### Initial SetUp
+These steps are performed on your `Host`.
+
 1. Install the [prerequisites](#Prerequisites)
 2. Clone this repository via git clone: `git clone git@github.com:zwoefler/Testing-Environments.git`
 3. Change Directory into kubespray-test: `cd Testing-Environments/kubespray-test`
 4. Run the Vagrantfile: `vagrant up`. It can take some time (several minutes) to create the machines and provisioning with ansible.
 
-Once the infrastructure is set up, connect to the ansible-host and follow the subsequent steps. Python3, Kubespray and the dependencies are already installed.
+With the commands above, you now should have 4 machines up and running on your `Host`. Now its time to use `kubespray` to install the cluster on these VMs. All machines are already provisioned with set up SSH-Keys, Python3, kubespray and other dependencies. You can now SSH into each machine, using the IPs which you can see in the console output. Further information can be found in the [Machines](#machines) section.
+Continue Reading the [Using Kubernetes](#using-kubernetes) section.
+Run `vagrant status` and you should see an output, similar to the following table:
 
-5. `vagrant ssh ansible-host`
-6. Once you are logged into the machine, change directory to kubespray `cd kubespray`
-7. Copy `inventory/sample` as `inventory/mycluster`
+Current machine states:
+
+ansible-host              powerd on (virtualbox)
+node1                     powerd on (virtualbox)
+node2                     powerd on (virtualbox)
+node3                     powerd on (virtualbox)
+
+
+##### Setup Kubespray
+Your VMs are up, running and already provisioned. Now its time to use `kubespray`, to deploy our cluster.
+From your `Host` we will now log into the `ansible-host` and provision our Node-machines from there.
+
+
+1. Log into our Ansible-host machine:
+`vagrant ssh ansible-host`
+
+2. Once you are logged into the machine, change directory to kubespray:
+`cd kubespray`
+
+3. Copy the folder `inventory/sample` to `inventory/mycluster`. This copys the `sample` folder and serves as a template for our cluster.:
 `cp -rfp inventory/sample inventory/mycluster`
-8. Declare your node IPs and then run the `declare -a IPS=(192.168.33.20 192.168.33.30 192.168.33.40)`
-9. Afterwards, use the `CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inventory.py ${IPS[@]}` command to run the ansible inventory bilder
-10. Last but not least, run the Ansible playbook that creates your kubernetes cluster via `Kubespray`: `ansible-playbook -i inventory/mycluster/hosts.yaml  --become --become-user=root cluster.yml`. This step might take more than 20 minutes!
+
+4. Now, we need to tell kubespray, which machines it should use to run the cluster. Kubespray comes with a handy script, that generates an Ansible-Host file for you. Declare your node IPs with the following command:
+`declare -a IPS=(192.168.33.20 192.168.33.30 192.168.33.40)`
+
+Of course you are free to add additional machines to the list.
+
+5. Afterwards, build the Ansible-host file, using the kubespray `inventory-builder`:
+`CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inventory.py ${IPS[@]}`
+
+This creates a `hosts.yml` in your `mycluster` folder, that is being used for provisioning the nodes in the following step.
+
+6. Last but not least, run the Ansible playbook that creates your kubernetes cluster via:
+`ansible-playbook -i inventory/mycluster/hosts.yaml  --become --become-user=root cluster.yml`.
+Be warned, this step might take 20 minutes or more!
+
+Finishing this step, you now have a running Kubernetes Cluster on several virtual machines. Congratulations!
+To use your cluster productivly, install `kubectl` on your `Host`. More information is found in the [next section](#use-your-cluster)
 
 
 ### Use your Cluster
@@ -249,6 +300,10 @@ listen kubernetes-apiserver-https
 11. On your localhost, add the IP and domain to oyur /etc/hosts
 12. On the Ansible-host, rerun the cluster
 `ansible-playbook -i inventory/mycluster/hosts.yml --user root cluster.yml`
+13. On Localhost, get kube config to localhost!
+14.
+
+
 
 ## ToDos
 1. Initialize the 4 machines, 3 nodes, 1 ansible master
@@ -261,6 +316,8 @@ listen kubernetes-apiserver-https
 
 - Create roles out of the spaghetti playbooks!
 
+- [ ] Output the IP addresses of the VMs with their corresponding nodes
+
 - [ ] Add a machine, provision it and use it as an additional node - Automatically:
     - [ ] Script to add Vagrant machine
     - [ ] Provision the machine
@@ -269,3 +326,8 @@ listen kubernetes-apiserver-https
         - [ ] Users
         - [ ] ...
     - [ ] Automate the adding a node to the cluster [#adding-and-removing-nodes]
+
+- [ ] Automated README script
+    - [ ] List of hosts in File - Building the tables for the machines automatically
+    - [ ] Put IP-addresses into the the commands
+    - [ ] Automated Table of Contents
