@@ -7,6 +7,7 @@
 # you're doing.
 BOX_IMAGE = "ubuntu/bionic64"
 NODE_COUNT = 3
+ANSIBLE_FOLDER = "ansible/"
 
 Vagrant.configure("2") do |config|
 
@@ -20,7 +21,7 @@ Vagrant.configure("2") do |config|
       v.cpus = 3
     end
     ans.vm.provision :ansible do |ansible|
-      ansible.playbook = "setup-ansible-host.yml"
+      ansible.playbook = "#{ANSIBLE_FOLDER}" + "setup-ansible-host.yml"
     end
   end
 
@@ -35,11 +36,8 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
       end
       subans.vm.provision :ansible do |ansible|
-        ansible.playbook = "setup-worker-node.yml"
+        ansible.playbook = "#{ANSIBLE_FOLDER}" + "setup-worker-node.yml"
       end
     end
   end
-
-
-
 end
