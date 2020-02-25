@@ -238,7 +238,7 @@ To actually see what happens, I advise you to run the watch command on `kubectl 
 Either adding or removing a node, reqires you to be logged into the `ansible-host` via
 `vagrant ssh ansible-host` and change directory into `kubespray`: `cd kubespray`.
 
-
+## WORK IN PROGRESS
 ### Adding a node
 Within the `kubespray` directory we now need to edit the `hosts.yml`, used by Kubespray, to setup your nodes.
 In this example, we will add a fourth node named `node4` to the cluster.
