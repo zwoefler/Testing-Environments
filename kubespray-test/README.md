@@ -2,17 +2,19 @@
 This environment simulates four machines, that can be used to run a kubernetes cluster.
 To run a kubernetes cluster on these machines, the project `kubespray` is being used.
 It is a bunch of Ansible playbooks, that take care of the initialization and installation
-of all relevant compontents, needed to run a Kubernetes Cluster on bare metal. Therefore, you don't need to disable swap, run kuberentes as etcd and otehr configurations using `kubeadm` manually.
+of all relevant compontents, needed to run a Kubernetes Cluster on bare metal.
+Therefore, you don't need to disable swap, run kuberentes as etcd and otehr configurations using `kubeadm` manually.
 
 
 # Goal
-This repository aims to get used to `kubespray`, the installation and setup-process. Therefore the kubespray usage is not fully automated with Ansible scripts!
+This repository aims to get familiar with `kubespray`, the installation and setup-process. Therefore the kubespray usage is not fully automated with Ansible scripts!
+
 
 # Architecture
-The architexture can be seen in the image below.
+The testing architexture can be seen in the image below.
 ![alt text](img/Architecture.png "Architecture")
 
-THis environment consists of your `Host`, an `ansible-host` (VM) and some `nodes` VM to run the Kubernetes Cluster.
+This environment consists of your `Host`, an `ansible-host` (VM) and some `nodes` VM to run the Kubernetes Cluster.
 The `ansible-host` s being used, to run `Kubespray` and serves as an external Load Balancer. This is, so you don't need to have Ansible installed on your host.
 
 In the following document, your local machine ist refered to as `Host`, the machine running Ansible and setting up the Cluster is refered to by `ansible-host` and every other Node is referenced as `nodeX`, with `X` being a number.
@@ -33,7 +35,7 @@ From the Ansible host you can reach every machine via SSH. Below, you find a lis
 | Node3 | 192.168.33.40 |
 
 ### Users
-Each machine has the user `root` and `vagrant`. The SSH keys are set up, sos you don't need a password to enter the machines. In case you do, the passwords are listed below:
+Each machine has the user `root` and `vagrant`. The SSH keys are set up, so you don't need a password to enter the machines. In case you do, the passwords are listed below:
 
 | User | Password |
 | --- | --- |
@@ -353,10 +355,14 @@ listen kubernetes-apiserver-https
 
 
 ## ToDos
+
+
 - Implement a way, to vary the amount of nodes
     - Automatically adjust the amount of nodes, to the systems resources
 
 - Create roles out of the spaghetti playbooks!
+
+- Parallize the Provisioning process of the VMs
 
 - [ ] Output the IP addresses of the VMs with their corresponding nodes
 
