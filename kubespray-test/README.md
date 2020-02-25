@@ -49,7 +49,7 @@ Each machine has the user `root` and `vagrant`. The SSH keys are set up, so you 
 # How to use it?
 
 ## Prerequisites
-##### VM Provider
+#### VM Provider
 THis example uses Vagrant to provide the Virtual Machines, but any other
 Provider should be fine.
 In case you want to follow this repository in the intentioned way, install Virtual Box.
@@ -59,14 +59,14 @@ On Ubuntu install VirtualBox via:
 
 `sudo apt install virtual-box`
 
-##### Vagrant
+#### Vagrant
 To run a cluster locally, on your machine, you need vagrant, to setup VMs easily, with the included `Vagrantfile`.
 
 On Ubuntu install Vagrant via:
 
 `sudo apt install vagrant`
 
-##### Kubernetes
+#### Kubernetes
 Once the VM setup is done, you will need kubernetes kubectl to control your Kubernetes cluster.
 
 
@@ -109,7 +109,7 @@ sudo apt-get install -y kubectl
 
 
 ## Set Up
-##### Initial SetUp
+#### Initial SetUp
 These steps are performed on your `Host`.
 
 1. Install the [prerequisites](#Prerequisites)
@@ -129,7 +129,7 @@ node2                     powerd on (virtualbox)
 node3                     powerd on (virtualbox)
 
 
-##### Setup Kubespray
+#### Setup Kubespray
 Your VMs are up, running and already provisioned. Now its time to use `kubespray`, to deploy our cluster.
 From your `Host` we will now log into the `ansible-host` and provision our Node-machines from there.
 
@@ -161,7 +161,7 @@ Finishing this step, you now have a running Kubernetes Cluster on several virtua
 To use your cluster productivly, install `kubectl` on your `Host`. More information is found in the [next section](#use-your-cluster).
 
 
-##### Setup Kubernetes on your Host
+#### Setup Kubernetes on your Host
 You have now a running Cluster, now its time to use and configure it.
 We now need to copy the kubernetes `admin.conf` from the master node `node1` to our local system.
 FOr that, we need the IP address of our master node.
@@ -183,7 +183,7 @@ We safecopy the `admin.conf` file from our `node1`, and paste it into our local 
 Now we have setup our cluster and can use our local installation of `kubectl` to run some containers.
 
 
-##### Test the interport communication
+#### Test the interport communication
 In order to test, if the installation worked correctly, we test the interport communication
 by creating two `busybox` containers, each on one node.
 
