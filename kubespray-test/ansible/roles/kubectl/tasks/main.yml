@@ -1,0 +1,14 @@
+---
+- name: curl the latest kubectl version
+  become: true
+  get_url:
+    url: "{{ kubectl_url }}"
+    dest: /usr/local/bin/
+    mode: 0775
+  tags: kubectl
+
+- name: Create ./kube folder for kubectl
+  file:
+    path: ~/.kube
+    state: directory
+  tags: kubectl

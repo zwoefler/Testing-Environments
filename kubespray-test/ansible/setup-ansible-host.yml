@@ -78,4 +78,5 @@
     become: true
     command: systemctl restart sshd
 
-
+  roles:
+    - kubectl
