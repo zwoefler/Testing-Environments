@@ -1,0 +1,64 @@
+---
+- name: Update apt cache on Ansible-host
+  become: true
+  apt:
+    update_cache: yes
+    upgrade: yes
+
+- name: Copy correct sshd_config to ansible-node
+  become: true
+  copy:
+    src: sshd_config
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install git and python-pip
+  become: true
+  apt:
+    pkg:
+    - git
+    - python-pip
+    - python3-pip
+    update_cache: yes
+    state: present
+
+- name: Upgrade pip3
+  become: true
+  pip:
+    name: pip
+    executable: pip3
+    extra_args: --upgrade
+  tags: pip, python3
+
+- name: Create SSH keys for user vagrant
+  user:
+    name: vagrant
+    generate_ssh_key: yes
+
+- name: Fetch Master Key
+  fetch:
+    src: "~/.ssh/id_rsa.pub"
+    dest: "./Master-Key/"
+    flat: yes
+
+- name: Change password for root to 'root'
+  become: true
+  user:
+    name: root
+    password: "{{ root_password | password_hash('sha512') }}"
+    update_password: always
+
+- name: Set authorizd ssh key from standard path
+  become: true
+  authorized_key:
+    user: "{{ item }}"
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  loop: "{{ users }}"
+
+
+- name: Restart sshd
+  become: true
+  command: systemctl restart sshd
