@@ -1,0 +1,39 @@
+# # -*- mode: ruby -*-
+# # vi: set ft=ruby :
+
+BOX_IMAGE = "centos/7"
+NODE_COUNT = 2
+ANSIBLE_FOLDER = "ansible/"
+
+Vagrant.configure("2") do |config|
+
+  # Create the Master Node and provision with Master Setup
+  config.vm.define "adminvm" do |ans|
+    ans.vm.box = BOX_IMAGE
+    ans.vm.hostname = "adminvm"
+    ans.vm.network "private_network", ip: "192.168.33.10"
+    ans.vm.provider "virtualbox" do |v|
+      v.memory = 1024
+      v.cpus = 1
+    end
+    ans.vm.provision :ansible do |ansible|
+      ansible.playbook = "#{ANSIBLE_FOLDER}" + "setup-adminhost.yml"
+    end
+  end
+
+  # Create Nodes and provision with basic setup
+  (1..NODE_COUNT).each do |i|
+    config.vm.define "host#{i}" do |subans|
+      subans.vm.box = BOX_IMAGE
+      subans.vm.hostname = "host#{i}"
+      subans.vm.network "private_network", ip: "192.168.33.#{i * 10 + 10}"
+      subans.vm.provider "virtualbox" do |v|
+        v.memory = 1024
+        v.cpus = 1
+      end
+      # subans.vm.provision :ansible do |ansible|
+      #   ansible.playbook = "#{ANSIBLE_FOLDER}" + "setup-dockerhost.yml"
+      # end
+    end
+  end
+end

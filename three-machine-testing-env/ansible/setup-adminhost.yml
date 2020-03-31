@@ -1,0 +1,116 @@
+---
+- hosts: all
+  vars:
+    prerequisite_packages:
+      - git
+      - gcc
+      - ansible
+      - python-devel
+    known_hosts: "github.com"
+    repo_address: "git@github.com:zwoefler/Tetris-Python-Game.git"
+    root_ssh_folder: /root/.ssh
+    user_ssh_folder: ~/.ssh
+
+    root_ssh_keys: ./admin-root-ssh-keys
+    user_source_ssh_folder: ./admin-ssh-keys
+    private_key: id_rsa
+    public_key: id_rsa.pub
+
+
+
+  tasks:
+  - name: Install required/prerequisites packages
+    become: true
+    yum:
+      pkg:
+        "{{ prerequisite_packages }}"
+      update_cache: yes
+    tags:
+    - prerequisites
+
+  - name: Create root ssh folder
+    become: true
+    file:
+      path: "{{ root_ssh_folder }}"
+      state: directory
+      mode: 0700
+    tags:
+      - ssh
+
+  - name: Copy root ssh private key
+    become: true
+    copy:
+      src: "{{ root_ssh_keys }}/{{ private_key }}"
+      dest: "{{ root_ssh_folder }}/{{ private_key }}"
+      owner: root
+      mode: 0600
+    tags:
+      - ssh
+
+  - name: Copy root ssh public key
+    become: true
+    copy:
+      src: "{{ root_ssh_keys }}/{{ public_key }}"
+      dest: "{{ root_ssh_folder }}/{{ public_key }}"
+      owner: root
+      mode: 0644
+    tags:
+      - ssh
+
+  - name: Copy admin user ssh private key
+    become: true
+    become_user: vagrant
+    copy:
+      src: "{{ user_source_ssh_folder }}/{{ private_key }}"
+      dest: "{{ user_ssh_folder }}/{{ private_key }}"
+      owner: vagrant
+      mode: 0600
+    tags:
+      - ssh
+
+  - name: Copy admin user ssh public key
+    become: true
+    become_user: vagrant
+    copy:
+      src: "{{ user_source_ssh_folder }}/{{ public_key }}"
+      dest: "{{ user_ssh_folder }}/{{ public_key }}"
+      owner: vagrant
+      mode: 0600
+    tags:
+      - ssh
+
+  - name: restart sshd
+    become: true
+    service:
+      name: sshd
+      state: restarted
+
+  - name: easy install pip
+    become: true
+    easy_install:
+      name: pip
+      state: latest
+    tags:
+      - pip
+
+  - name: Add GitHub to the known hosts
+    known_hosts:
+      path: ~/.ssh/known_hosts
+      host: "{{ known_hosts }}"
+      key: "{{ lookup('pipe', 'ssh-keyscan -t rsa {{ known_hosts }}') }}"
+
+  - name: Checkout psa.devops.git repository from bitbucket
+    become_user: vagrant
+    git:
+      repo: "{{ repo_address }}"
+      dest: ~/ansible-repos
+    tags:
+      - git
+
+  - name: Remember to add the user publickey to your personal "{{ known_hosts }}" account
+    debug:
+      msg: "Add the user pubkey: \\n {{ lookup('file', '{{ user_ssh_folder }}/{{ public_key }}') }}"
+
+
+
+
