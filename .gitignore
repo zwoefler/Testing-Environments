@@ -3,4 +3,7 @@
 *.retry
 */.vagrant
 */.vagrant/
+.terraform
+.terraform/
+terraform.*
 
