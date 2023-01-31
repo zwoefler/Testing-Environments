@@ -1,6 +1,10 @@
 # Testing-Environments
 This repository contains different testing environemnts for all kinds of technologies
 
+Maybe add:
+- K3N
+- Rancher?
+
 ## The Goal
 Test whatever technology you want, by just pressing a button, to create a testing environment, either locally, or without a lot of manual setup-steps, in your cloud-environment!
 
